@@ -195,6 +195,12 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        /*
+         * Extension Service Providers
+         */
+        App\Providers\ExtensionProviders\ExtensionRepositoryProvider::class,
+        App\Providers\ExtensionProviders\ExtensionServiceProvider::class,
+
     ],
 
     /*
