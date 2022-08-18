@@ -15,7 +15,14 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+
+            $table->string('article', 255)->unique()->index();
+            $table->string('name', 255);
+            $table->string('status', 255)->default('available');
+            $table->jsonb('data')->nullable();
+
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

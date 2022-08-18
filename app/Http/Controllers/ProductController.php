@@ -2,84 +2,97 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
+use App\Contracts\Services\ProductServiceContract;
+use App\Http\Requests\ProductCreateRequest;
+use App\Http\Requests\ProductUpdateRequest;
+use App\Http\Resources\ProductCollection;
+use App\Http\Resources\ProductResource;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    protected ProductServiceContract $productService;
+
+    public function __construct(ProductServiceContract $productService)
+    {
+        $this->productService = $productService;
+    }
+
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @return Application|Factory|View
      */
     public function index()
     {
-        //
+        return view('pages.product.index', [
+            'products' => (new ProductCollection($this->productService->getAll()))
+        ]);
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @return Application|Factory|View
      */
     public function create()
     {
-        //
+        return view('pages.product.create');
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param ProductCreateRequest $request
+     * @return RedirectResponse
      */
-    public function store(Request $request)
+    public function store(ProductCreateRequest $request)
     {
-        //
+        $this->productService->create($request->all());
+
+        return redirect()->route('products.list');
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
+     * @param int $id
+     * @return Application|Factory|View
      */
-    public function show(Product $product)
+    public function show(int $id)
     {
-        //
+        return view('pages.product.show', [
+            'product' => (new ProductResource($this->productService->getById($id)))
+        ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
+     * @param int $id
+     * @return Application|Factory|View
      */
-    public function edit(Product $product)
+    public function edit(int $id)
     {
-        //
+        return view('pages.product.edit', [
+            'product' => (new ProductResource($this->productService->getById($id)))
+        ]);
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
+     * @param ProductUpdateRequest $request
+     * @param int $id
+     * @return RedirectResponse
      */
-    public function update(Request $request, Product $product)
+    public function update(ProductUpdateRequest $request, int $id)
     {
-        //
+        $this->productService->updateById($id, $request->except('_method', '_token'));
+
+        return redirect()->route('products.list');
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return RedirectResponse
      */
-    public function destroy(Product $product)
+    public function destroy(Request $request)
     {
-        //
+        $this->productService->deleteById($request->get('id'));
+
+        return redirect()->route('products.list');
     }
 }
